@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Valetax USC Grid PTS Calculator</title>
+<style>
+:root{color-scheme:dark;--bg:#0b1020;--panel:#141c30;--panel2:#1b2740;--line:#2a3854;--muted:#9aabc5;--text:#edf3ff;--gold:#e4b85c;--green:#37c995;--red:#ff727c;--amber:#f2bd58}
+*{box-sizing:border-box}body{margin:0;background:linear-gradient(145deg,#0b1020,#101a2c);color:var(--text);font:15px/1.5 Inter,system-ui,Segoe UI,Arial,sans-serif}
+.wrap{max-width:1100px;margin:30px auto;padding:0 16px}.hero{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:20px}.hero h1{font-size:clamp(22px,4vw,32px);margin:0}.hero p{color:var(--muted);margin:5px 0}.pill{border:1px solid #397c68;color:#78e0b9;border-radius:99px;padding:6px 11px;font-size:12px;white-space:nowrap}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}.card{background:rgba(20,28,48,.96);border:1px solid var(--line);border-radius:16px;padding:18px;box-shadow:0 12px 30px #0002}.card h2{font-size:17px;margin:0 0 14px}.fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.field label{display:block;color:var(--muted);font-size:12px;margin-bottom:5px}.field input,.field select{width:100%;background:#0d1527;color:var(--text);border:1px solid var(--line);border-radius:9px;padding:11px;font-size:15px;outline:none}.field input:focus,.field select:focus{border-color:var(--gold)}.hint{font-size:12px;color:var(--muted);margin:10px 0 0}.seg{display:flex;gap:8px}.seg button,.actions button{border:1px solid var(--line);border-radius:9px;background:#0d1527;color:var(--text);padding:10px 14px;cursor:pointer}.seg button.active{background:#59451f;border-color:var(--gold);color:#ffe2a0}.radio{display:flex;flex-wrap:wrap;gap:12px;color:var(--muted);font-size:13px}.radio label{display:flex;align-items:center;gap:6px}.results{grid-column:1/-1}.big{background:linear-gradient(120deg,#202c43,#18243a);border:1px solid var(--line);border-radius:13px;padding:17px}.big small,.metric small{display:block;color:var(--muted);font-size:12px}.big strong{display:block;font-size:clamp(25px,5vw,36px);margin-top:3px}.metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:12px}.metric{background:#0e1729;border:1px solid var(--line);border-radius:11px;padding:12px;min-width:0}.metric strong{display:block;font-size:17px;overflow-wrap:anywhere;margin-top:4px}.good{color:var(--green)}.bad{color:var(--red)}.warn{color:var(--amber)}.bar{height:9px;background:#293650;border-radius:99px;overflow:hidden;margin-top:8px}.bar span{display:block;height:100%;background:var(--green);width:0}.tablewrap{max-height:420px;overflow:auto;border:1px solid var(--line);border-radius:10px;margin-top:12px}table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}th,td{padding:9px 10px;border-bottom:1px solid #26334c;text-align:right;white-space:nowrap}th{position:sticky;top:0;background:#1a2740;color:#c5d2e7;font-size:12px}th:first-child,td:first-child{text-align:left}tr:last-child td{border-bottom:0}.actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:13px}.actions button.primary{background:var(--gold);color:#1a1a1a;border-color:var(--gold);font-weight:700}.note{font-size:12px;color:var(--muted);margin-top:15px}.warning{border-left:3px solid var(--amber);padding:9px 12px;background:#302719;color:#f3d69c;border-radius:5px;font-size:12px;margin-top:12px}
+@media(max-width:760px){.grid{grid-template-columns:1fr}.results{grid-column:auto}.metrics{grid-template-columns:repeat(2,minmax(0,1fr))}.hero{align-items:flex-start;flex-direction:column}}
+@media(max-width:420px){.fields{grid-template-columns:1fr}.wrap{padding:0 11px}.card{padding:14px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="hero"><div><h1>Valetax USC Grid PTS Calculator</h1><p>XAUUSD.vxc · Simulasi Grid / DCA / Martingale</p></div><span class="pill">POINT 0.01 · 2 DIGIT</span></header>
+<main class="grid">
+<section class="card">
+<h2>1. Pengaturan strategi</h2>
+<div class="fields">
+<div class="field"><label>Initial Lot</label><input id="lot" type="number" min="0.00001" step="any" value="0.01"></div>
+<div class="field"><label>Multiplier</label><input id="mult" type="number" min="0.00001" step="any" value="1.05"></div>
+<div class="field"><label>Jumlah level</label><input id="levels" type="number" min="1" max="200" step="1" value="30"></div>
+<div class="field"><label>Distance antar level (PTS)</label><input id="pts" type="number" min="1" step="1" value="500"></div>
+<div class="field"><label>Harga entry awal</label><input id="price" type="number" min="0.00001" step="any" value="3900"></div>
+<div class="field"><label>Contract size</label><input id="contract" type="number" min="0.00001" step="any" value="1"></div>
+</div>
+<p class="hint" id="distanceHint">500 PTS = 5.00 pergerakan harga.</p>
+</section>
+<section class="card">
+<h2>2. Pengaturan akun</h2>
+<div class="fields">
+<div class="field"><label>Equity awal (USC)</label><input id="equity" type="number" min="0.01" step="any" value="10000"></div>
+<div class="field"><label>Leverage (1 : x)</label><input id="leverage" type="number" min="1" step="1" value="1000"></div>
+<div class="field"><label>Stop Out (%)</label><input id="stopout" type="number" min="0" step="any" value="50"></div>
+<div class="field"><label>Biaya tambahan simulasi (USC)</label><input id="cost" type="number" min="0" step="any" value="0"></div>
+</div>
+<h2 style="margin-top:18px">3. Arah grid</h2>
+<div class="seg"><button id="buy" class="active" type="button">BUY GRID</button><button id="sell" type="button">SELL GRID</button></div>
+<h2 style="margin-top:18px">4. Aturan volume</h2>
+<div class="fields">
+<div class="field"><label>Volume step</label><select id="step"><option>0.01</option><option>0.001</option><option>0.0001</option><option>0.00001</option></select></div>
+<div class="field"><label>Pembulatan tiap level</label><select id="rounding"><option value="up">Ke atas</option><option value="nearest">Terdekat</option><option value="down">Ke bawah</option><option value="none">Tanpa pembulatan (teoretis)</option></select></div>
+</div>
+</section>
+<section class="card results">
+<h2>5. Hasil simulasi saat harga mencapai level terakhir</h2>
+<div class="big"><small>Total floating (USC)</small><strong id="floating" class="bad">—</strong><span class="hint" id="floatingUsd"></span></div>
+<div class="metrics">
+<div class="metric"><small>Total volume</small><strong id="totalLot">—</strong></div>
+<div class="metric"><small>Lot level terakhir</small><strong id="lastLot">—</strong></div>
+<div class="metric"><small>Harga level terakhir</small><strong id="lastPrice">—</strong></div>
+<div class="metric"><small>Total jarak harga</small><strong id="totalDistance">—</strong></div>
+<div class="metric"><small>Equity setelah floating</small><strong id="equityAfter">—</strong></div>
+<div class="metric"><small>Estimasi margin terpakai</small><strong id="margin">—</strong></div>
+<div class="metric"><small>Estimasi free margin</small><strong id="freeMargin">—</strong></div>
+<div class="metric"><small>Margin level</small><strong id="marginLevel">—</strong><div class="bar"><span id="bar"></span></div></div>
+</div>
+<div id="status" class="warning">Hasil merupakan estimasi, bukan jaminan harga Stop Out.</div>
+<h2 style="margin-top:22px">6. Rincian setiap level</h2>
+<div class="tablewrap"><table><thead><tr><th>Level</th><th>Lot</th><th>Entry</th><th>Floating (USC)</th><th>Margin (USC)</th></tr></thead><tbody id="rows"></tbody></table></div>
+<div class="actions"><button class="primary" id="csv">Unduh CSV</button><button id="reset">Reset default</button><button id="print">Cetak laporan</button></div>
+<p class="note">Model menganggap semua level telah terisi dan harga bergerak berlawanan dengan grid sampai harga level terakhir. Floating dihitung dengan contract size yang dimasukkan dan asumsi 1 USD = 100 USC. Spread, swap, komisi, slippage, konversi aktual, serta aturan margin broker belum dimasukkan secara otomatis.</p>
+</section>
+</main>
+</div>
+<script>
+const ids=['lot','mult','levels','pts','price','contract','equity','leverage','stopout','cost','step','rounding'];
+let direction='BUY', lastData=[];
+const $=id=>document.getElementById(id);
+const val=id=>Number($(id).value);
+const fmt=(n,d=2)=>Number(n).toLocaleString('en-US',{minimumFractionDigits:d,maximumFractionDigits:d});
+const usc=n=>fmt(n,2)+' USC';
+function calculate(){
+ const v=Object.fromEntries(ids.map(id=>[id,$(id).value]));
+ const nums=['lot','mult','levels','pts','price','contract','equity','leverage','stopout','cost','step'];
+ const ok=nums.every(k=>v[k].trim()!==''&&Number.isFinite(Number(v[k])))&&val('lot')>0&&val('mult')>0&&Number.isInteger(val('levels'))&&val('levels')>=1&&val('levels')<=200&&val('pts')>0&&val('price')>0&&val('contract')>0&&val('equity')>0&&val('leverage')>0&&val('stopout')>=0&&val('cost')>=0&&val('step')>0;
+ if(!ok){$('status').textContent='Input tidak valid. Periksa kembali nilai yang dimasukkan.';return}
+ const n=val('levels'), distance=val('pts')*0.01, step=val('step'), mode=$('rounding').value;
+ const adverse=direction==='BUY'?-1:1;
+ const finalPrice=val('price')+adverse*(n-1)*distance;
+ let cumulative=0;
+ lastData=Array.from({length:n},(_,i)=>{
+   const raw=val('lot')*Math.pow(val('mult'),i);
+   let volume=raw;
+   if(mode!=='none'){
+     const q=raw/step;
+     volume=(mode==='up'?Math.ceil(q-1e-10):mode==='down'?Math.floor(q+1e-10):Math.round(q))*step;
+     volume=Number(volume.toFixed(8));
+   }
+   const entry=val('price')+adverse*i*distance;
+   const floating=(direction==='BUY'?finalPrice-entry:entry-finalPrice)*volume*val('contract')*100;
+   // Approximation only: margin converted to USC using 100 USC per USD.
+   const margin=entry*volume*val('contract')/val('leverage')*100;
+   cumulative+=volume;
+   return {level:i+1,lot:volume,entry,floating,margin};
+ });
+ const totalLot=lastData.reduce((s,r)=>s+r.lot,0);
+ const floating=lastData.reduce((s,r)=>s+r.floating,0)-val('cost');
+ const margin=lastData.reduce((s,r)=>s+r.margin,0);
+ const equity=val('equity')+floating, free=equity-margin, ml=margin>0?equity/margin*100:Infinity;
+ $('distanceHint').textContent=`${fmt(val('pts'),0)} PTS × 0.01 = ${fmt(distance,2)} pergerakan harga per level.`;
+ $('floating').textContent=usc(floating);$('floating').className=floating<0?'bad':'good';
+ $('floatingUsd').textContent=`Setara ${fmt(floating/100,2)} USD (asumsi kurs nominal 100 USC = 1 USD).`;
+ $('totalLot').textContent=fmt(totalLot,5)+' lot';$('lastLot').textContent=fmt(lastData.at(-1).lot,5)+' lot';
+ $('lastPrice').textContent=fmt(finalPrice,2);$('totalDistance').textContent=fmt((n-1)*distance,2);
+ $('equityAfter').textContent=usc(equity);$('margin').textContent=usc(margin);$('freeMargin').textContent=usc(free);
+ $('marginLevel').textContent=Number.isFinite(ml)?fmt(ml,2)+'%':'∞';
+ $('bar').style.width=Number.isFinite(ml)?Math.max(0,Math.min(100,ml/500*100))+'%':'100%';
+ $('bar').style.background=ml<=val('stopout')?'var(--red)':ml<150?'var(--amber)':'var(--green)';
+ const status=equity<=0?'Equity simulasi habis atau negatif.':margin>0&&ml<=val('stopout')?'Margin level mencapai atau melewati ambang Stop Out yang dimasukkan.':margin>0&&ml<150?'Margin level rendah dalam simulasi.':'Belum mencapai ambang Stop Out simulasi.';
+ $('status').textContent=status;
+ $('rows').innerHTML=lastData.map(r=>`<tr><td>${r.level}</td><td>${fmt(r.lot,5)}</td><td>${fmt(r.entry,2)}</td><td class="${r.floating<0?'bad':'good'}">${fmt(r.floating,2)}</td><td>${fmt(r.margin,2)}</td></tr>`).join('');
+}
+ids.forEach(id=>$(id).addEventListener('input',calculate));
+$('buy').onclick=()=>{direction='BUY';$('buy').classList.add('active');$('sell').classList.remove('active');calculate()};
+$('sell').onclick=()=>{direction='SELL';$('sell').classList.add('active');$('buy').classList.remove('active');calculate()};
+$('csv').onclick=()=>{
+ const lines=[['Level','Lot','Entry','Floating_USC','Margin_USC'],...lastData.map(r=>[r.level,r.lot,r.entry,r.floating,r.margin])];
+ const csv=lines.map(row=>row.join(',')).join('\r\n');
+ const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'}),url=URL.createObjectURL(blob),a=document.createElement('a');
+ a.href=url;a.download='valetax_grid_pts_report.csv';a.click();URL.revokeObjectURL(url);
+};
+$('reset').onclick=()=>{const defaults={lot:'0.01',mult:'1.05',levels:'30',pts:'500',price:'3900',contract:'1',equity:'10000',leverage:'1000',stopout:'50',cost:'0',step:'0.01',rounding:'up'};Object.entries(defaults).forEach(([k,v])=>$(k).value=v);direction='BUY';$('buy').classList.add('active');$('sell').classList.remove('active');calculate()};
+$('print').onclick=()=>window.print();
+calculate();
+</script>
+</body>
+</html>
